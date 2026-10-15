@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Lotte Finance - Sổ Tay Khoản Vay</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Lotte Finance">
+    <meta name="theme-color" content="#0d0d0e">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ED1C24'/%3E%3Cstop offset='100%25' stop-color='%23A0080E'/%3E%3C/linearGradient%3E%3ClinearGradient id='gold' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FFE259'/%3E%3Cstop offset='100%25' stop-color='%23FFA751'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='120' fill='url(%23bg)'/%3E%3Ccircle cx='256' cy='256' r='200' fill='none' stroke='rgba(255,255,255,0.15)' stroke-width='12'/%3E%3Cpath d='M180 130 h60 v190 h100 v50 H180 Z' fill='%23FFFFFF' filter='drop-shadow(0px 8px 16px rgba(0,0,0,0.3))'/%3E%3Ccircle cx='348' cy='180' r='18' fill='url(%23gold)'/%3E%3C/svg%3E">
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ED1C24'/%3E%3Cstop offset='100%25' stop-color='%23A0080E'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='120' fill='url(%23bg)'/%3E%3Cpath d='M180 130 h60 v190 h100 v50 H180 Z' fill='%23FFFFFF'/%3E%3C/svg%3E">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ios: {
+                            bg: '#000000', card: '#1c1c1e', cardSecondary: '#2c2c2e',
+                            red: '#ED1C24', redDark: '#C81018', green: '#30d158',
+                            blue: '#0a84ff', orange: '#ff9f0a', yellow: '#ffd60a',
+                            gray: '#8e8e93', gray2: '#aeaeb2'
+                        }
+                    },
+                    fontFamily: { sf: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Segoe UI', 'Roboto', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none; -webkit-user-select: none;
+        }
+        body { background-color: #000000; color: #ffffff; overflow-x: hidden; }
+        .glass-header { background: rgba(18, 18, 20, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .glass-tabbar { background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); }
+        .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
+        .pb-safe { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+        .ios-active-scale { transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+        .ios-active-scale:active { transform: scale(0.96); }
+        .tab-content { display: none; opacity: 0; transform: translateY(6px); transition: opacity 0.25s ease, transform 0.25s ease; }
+        .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
+        input[type="date"], input[type="number"] { color-scheme: dark; }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen font-sf antialiased selection:bg-red-500 selection:text-white">
+
+    <div id="save-indicator" class="fixed top-20 left-1/2 -translate-x-1/2 z-[70] bg-ios-green/90 backdrop-blur-md text-black text-[11px] font-extrabold px-3.5 py-1.5 rounded-full shadow-xl flex items-center gap-1.5 opacity-0 -translate-y-2 transition-all duration-300 pointer-events-none">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Đã lưu
+    </div>
+
+    <header class="sticky top-0 z-40 w-full glass-header pt-safe pb-3 px-5 border-b border-white/10 transition-all">
+        <div class="max-w-md mx-auto flex justify-between items-end">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-ios-red to-ios-redDark p-0.5 shadow-lg shadow-red-600/30 flex items-center justify-center border border-white/20">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 512 512" fill="none">
+                        <path d="M180 130 h60 v190 h100 v50 H180 Z" fill="currentColor"/>
+                        <circle cx="348" cy="180" r="22" fill="#FFE259"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-ios-green animate-pulse"></span>
+                        <p class="text-[11px] font-bold tracking-widest text-ios-red uppercase">Lotte Finance</p>
+                    </div>
+                    <h1 class="text-xl font-extrabold text-white tracking-tight leading-tight">Sổ Tay Khoản Vay</h1>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] text-ios-gray block font-semibold uppercase tracking-wider">Trạng thái</span>
+                <span class="inline-block bg-ios-green/15 text-ios-green text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border border-ios-green/30">Đang hoạt động</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 pt-4 pb-32 space-y-4">
+
+        <!-- TAB 1: TỔNG QUAN -->
+        <div id="tab-home" class="tab-content active space-y-4">
+            <div class="relative overflow-hidden rounded-[28px] p-6 text-white shadow-2xl bg-gradient-to-br from-[#ED1C24] via-[#B81017] to-[#5C0307] border border-white/20">
+                <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -top-10 w-32 h-32 bg-yellow-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex justify-between items-start relative z-10">
+                    <div>
+                        <p class="text-[11px] font-bold tracking-widest text-red-200/90 uppercase">Hợp đồng vay tiêu dùng</p>
+                        <h2 class="text-3xl font-black mt-0.5 tracking-tight">25.000.000 ₫</h2>
+                        <p class="text-xs text-red-100/80 mt-1 font-medium">Khách hàng: <strong class="text-white font-bold">Phạm Thị Thùy Trâm</strong></p>
+                    </div>
+                    <span class="bg-black/30 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full text-[11px] font-bold text-white shadow-inner">7 Kỳ</span>
+                </div>
+                <div class="mt-6 pt-4 border-t border-white/20 grid grid-cols-2 gap-2 text-xs relative z-10">
+                    <div>
+                        <p class="text-red-200/80 text-[10px] font-semibold uppercase tracking-wider">Thực nhận về ví</p>
+                        <p class="font-bold text-base text-white mt-0.5">23.500.000 ₫</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-red-200/80 text-[10px] font-semibold uppercase tracking-wider">Phí dịch vụ &amp; Bảo hiểm</p>
+                        <p class="font-bold text-base text-red-200 mt-0.5">1.500.000 ₫</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="next-payment-card" class="bg-ios-card rounded-[22px] p-4 border border-ios-orange/30 shadow-lg relative overflow-hidden bg-gradient-to-r from-ios-card via-ios-card to-ios-orange/10">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-ios-orange animate-ping"></span>
+                            <p id="next-term-title" class="text-xs font-bold text-ios-orange uppercase tracking-wider">Kỳ tiếp theo · Kỳ 1/7</p>
+                        </div>
+                        <p id="next-countdown-days" class="text-xl font-black text-white mt-1 tracking-tight">Còn 2 ngày nữa</p>
+                    </div>
+                    <span id="next-status-badge" class="bg-ios-orange/20 border border-ios-orange/40 text-ios-orange text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm">Sắp đến hạn</span>
+                </div>
+                <div class="mt-3 pt-3 border-t border-white/10 flex justify-between items-end">
+                    <div>
+                        <p id="next-term-date" class="text-xs font-bold text-ios-gray2">Thứ Sáu, 16/10/2026</p>
+                        <p id="next-term-amount" class="text-xl font-extrabold text-white mt-0.5">3.806.018 ₫</p>
+                    </div>
+                    <button onclick="switchTab('schedule', document.querySelectorAll('.nav-tab')[1])" class="bg-white/10 hover:bg-white/20 active:scale-95 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold border border-white/10 transition">Chi tiết</button>
+                </div>
+            </div>
+
+            <div class="bg-ios-card rounded-[22px] p-4 border border-white/5 space-y-3 shadow-lg">
+                <div class="flex justify-between items-center text-xs font-bold">
+                    <span class="text-ios-gray2 tracking-wider uppercase text-[11px]">Tiến độ hoàn thành</span>
+                    <span id="progress-text" class="text-ios-green font-extrabold text-sm">0/7 Kỳ (0%)</span>
+                </div>
+                <div class="w-full bg-ios-cardSecondary h-3.5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                    <div id="progress-bar" class="bg-gradient-to-r from-ios-green via-emerald-400 to-teal-300 h-full rounded-full transition-all duration-500 shadow-sm" style="width: 0%"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div class="bg-ios-cardSecondary/60 p-2.5 rounded-xl border border-white/5">
+                        <span class="text-[10px] text-ios-gray font-semibold block uppercase">Đã thanh toán</span>
+                        <strong id="sum-paid" class="text-sm font-black text-ios-green">0 ₫</strong>
+                    </div>
+                    <div class="bg-ios-cardSecondary/60 p-2.5 rounded-xl border border-white/5 text-right">
+                        <span class="text-[10px] text-ios-gray font-semibold block uppercase">Dư nợ còn lại</span>
+                        <strong id="sum-remaining" class="text-sm font-black text-ios-red">31.359.589 ₫</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-ios-card p-4 rounded-[22px] border border-white/5 space-y-1 shadow-lg">
+                    <p class="text-[10px] text-ios-gray font-bold uppercase tracking-wider">Đóng định kỳ</p>
+                    <p class="text-base font-black text-white">4.592.262 ₫</p>
+                    <p class="text-[10px] text-ios-orange font-semibold">Hàng tháng (Ngày 16)</p>
+                </div>
+                <div class="bg-ios-card p-4 rounded-[22px] border border-white/5 space-y-1 shadow-lg">
+                    <p class="text-[10px] text-ios-gray font-bold uppercase tracking-wider">Tổng gốc + lãi đủ</p>
+                    <p class="text-base font-black text-white">31.359.589 ₫</p>
+                    <p class="text-[10px] text-ios-red font-semibold">Chênh lệch: 6.359.589 ₫</p>
+                </div>
+            </div>
+
+            <div class="bg-ios-card rounded-[22px] p-4 border border-white/5 space-y-2 text-xs">
+                <div class="flex justify-between items-center pb-2 border-b border-white/5">
+                    <span class="text-ios-gray">Ngày giải ngân khoản vay:</span>
+                    <strong class="text-white font-bold">09/10/2026</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-ios-gray">Kỳ đầu tiên (Kỳ 1):</span>
+                    <strong class="text-ios-red font-bold">16/10/2026</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: LỊCH TRẢ NỢ -->
+        <div id="tab-schedule" class="tab-content space-y-3">
+            <div class="flex justify-between items-center px-1">
+                <span class="text-xs font-bold text-ios-gray tracking-wider uppercase">Lịch thanh toán 7 kỳ</span>
+                <span class="text-xs text-ios-blue font-semibold">Định kỳ ngày 16</span>
+            </div>
+            <div id="schedule-container" class="space-y-2.5"></div>
+        </div>
+
+        <!-- TAB 3: CÀI ĐẶT -->
+        <div id="tab-settings" class="tab-content space-y-4">
+            <div class="bg-ios-card rounded-[22px] overflow-hidden border border-white/5 shadow-lg">
+                <div class="p-4 border-b border-white/5">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-4 h-4 text-ios-red" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                        <p class="font-bold text-sm text-white">Mức phí chậm trả theo kỳ</p>
+                    </div>
+                    <p class="text-[11px] text-ios-gray mt-1.5 leading-relaxed">
+                        Công thức: <span class="text-ios-gray2 font-semibold">Phí chậm trả = Tổng trả của kỳ × Mức phí (%)</span>. Mỗi kỳ có thể đặt một mức riêng. Mặc định <strong class="text-white">0%</strong>. <span class="text-ios-green font-semibold">Lưu tự động khi gõ.</span>
+                    </p>
+                </div>
+                <div id="rate-container" class="divide-y divide-white/5"></div>
+            </div>
+
+            <div class="bg-ios-card rounded-[22px] overflow-hidden border border-white/5 divide-y divide-white/5 shadow-lg">
+                <div class="p-4 flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-sm text-white">Đặt lại lịch thanh toán</p>
+                        <p class="text-xs text-ios-gray">Xóa toàn bộ ngày đóng đã nhập (giữ nguyên mức phí)</p>
+                    </div>
+                    <button onclick="resetData()" class="text-ios-red text-xs font-bold bg-ios-red/10 px-3.5 py-2 rounded-full hover:bg-ios-red/20 transition">Reset</button>
+                </div>
+            </div>
+
+            <div class="bg-ios-card rounded-[22px] p-4 border border-white/5 space-y-2 text-xs text-ios-gray shadow-lg">
+                <p class="font-bold text-white text-sm">Tóm tắt hợp đồng Lotte Finance</p>
+                <p>• Mã gói vay: 25.000.000 ₫ (Thực nhận 23.500.000 ₫ sau khi trừ 1.500.000 ₫ bảo hiểm &amp; phí dịch vụ).</p>
+                <p>• Trả góp 7 kỳ liên tục, đáo hạn ngày 16 hàng tháng. Kỳ 1: 3.806.018 ₫ · Kỳ 2–6: 4.592.262 ₫ · Kỳ 7: 4.592.261 ₫.</p>
+                <p>• Tổng tiền gốc + lãi tất toán: 31.359.589 ₫ (gốc 25.000.000 ₫ + lãi 6.359.589 ₫).</p>
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md h-16 glass-tabbar rounded-full border border-white/15 px-6 flex justify-around items-center z-50 shadow-2xl">
+        <button onclick="switchTab('home', this)" class="nav-tab flex flex-col items-center justify-center space-y-1 text-ios-red transition-colors">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span class="text-[10px] font-bold">Tổng quan</span>
+        </button>
+        <button onclick="switchTab('schedule', this)" class="nav-tab flex flex-col items-center justify-center space-y-1 text-ios-gray hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+            <span class="text-[10px] font-bold">Lịch trả nợ</span>
+        </button>
+        <button onclick="switchTab('settings', this)" class="nav-tab flex flex-col items-center justify-center space-y-1 text-ios-gray hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6-3.6z"/></svg>
+            <span class="text-[10px] font-bold">Cài đặt</span>
+        </button>
+    </nav>
+
+    <!-- Bottom sheet: Nhập ngày đóng -->
+    <div id="payment-sheet" class="fixed inset-0 z-[60] hidden">
+        <div id="sheet-backdrop" onclick="closeSheet()" class="absolute inset-0 bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+        <div id="sheet-panel" class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-full max-w-md bg-[#1c1c1e] rounded-t-[28px] border-t border-white/10 px-5 pt-3 pb-safe transition-transform duration-300 ease-out max-h-[88vh] overflow-y-auto">
+            <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
+            <div class="flex justify-between items-start">
+                <div>
+                    <p id="sheet-term" class="text-[11px] font-bold uppercase tracking-widest text-ios-red">Kỳ 1/7</p>
+                    <h3 id="sheet-due" class="text-lg font-extrabold text-white mt-0.5">Hạn đóng: 16/10/2026</h3>
+                </div>
+                <span id="sheet-badge" class="text-[10px] font-extrabold px-3 py-1 rounded-full border bg-ios-orange/15 text-ios-orange border-ios-orange/30">Chưa thanh toán</span>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-2">
+                <div class="bg-ios-cardSecondary/70 rounded-xl p-2.5 border border-white/5">
+                    <p class="text-[9px] text-ios-gray font-bold uppercase tracking-wide">Tiền gốc</p>
+                    <p id="sheet-principal" class="text-[11px] font-extrabold text-white mt-1">—</p>
+                </div>
+                <div class="bg-ios-cardSecondary/70 rounded-xl p-2.5 border border-white/5">
+                    <p class="text-[9px] text-ios-gray font-bold uppercase tracking-wide">Tiền lãi</p>
+                    <p id="sheet-interest" class="text-[11px] font-extrabold text-white mt-1">—</p>
+                </div>
+                <div class="bg-ios-cardSecondary/70 rounded-xl p-2.5 border border-white/5">
+                    <p class="text-[9px] text-ios-gray font-bold uppercase tracking-wide">Tổng trả</p>
+                    <p id="sheet-total" class="text-[11px] font-extrabold text-ios-yellow mt-1">—</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex justify-between items-center">
+                    <label for="sheet-date" class="text-[11px] font-bold uppercase tracking-wider text-ios-gray">Ngày đóng thực tế</label>
+                    <button onclick="setDueDate()" class="text-[10px] font-bold text-ios-blue bg-ios-blue/10 px-2.5 py-1 rounded-full active:scale-95 transition">Đóng đúng hạn</button>
+                </div>
+                <input type="date" id="sheet-date"
+                       oninput="onSheetDateChange()"
+                       onchange="onSheetDateChange()"
+                       class="w-full mt-2 bg-ios-cardSecondary text-white rounded-xl px-3.5 py-3 text-sm font-bold border border-white/10 outline-none focus:border-ios-red transition">
+                <p class="text-[10px] text-ios-gray mt-1.5">Để trống nếu kỳ này chưa thanh toán. Dữ liệu được <strong class="text-ios-green">lưu tự động</strong>.</p>
+            </div>
+            <div id="sheet-preview" class="mt-3"></div>
+            <div class="mt-4 flex gap-2 pb-2">
+                <button id="sheet-clear" onclick="clearPayment()" class="flex-1 bg-ios-cardSecondary text-ios-red text-xs font-bold py-3 rounded-xl border border-white/5 active:scale-95 transition">Bỏ đánh dấu</button>
+                <button onclick="closeSheet()" class="flex-1 bg-gradient-to-br from-ios-red to-ios-redDark text-white text-xs font-extrabold py-3 rounded-xl shadow-lg shadow-red-600/30 active:scale-95 transition">Xong</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================
+           1. DỮ LIỆU HỢP ĐỒNG
+           ========================================================= */
+        function mkDate(y, m, d) { return new Date(y, m - 1, d); }
+        const THU = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+
+        const scheduleData = [
+            { term: 1, dateObj: mkDate(2026, 10, 16), date: '16/10/2026', principal: 3571429, interest: 234589,  amount: 3806018, note: 'Bắt đầu kỳ 1 (Giải ngân 09/10/2026)' },
+            { term: 2, dateObj: mkDate(2026, 11, 16), date: '16/11/2026', principal: 3571429, interest: 1020833, amount: 4592262, note: 'Kỳ 2' },
+            { term: 3, dateObj: mkDate(2026, 12, 16), date: '16/12/2026', principal: 3571429, interest: 1020833, amount: 4592262, note: 'Kỳ 3' },
+            { term: 4, dateObj: mkDate(2027, 1, 16),  date: '16/01/2027', principal: 3571429, interest: 1020833, amount: 4592262, note: 'Kỳ 4' },
+            { term: 5, dateObj: mkDate(2027, 2, 16),  date: '16/02/2027', principal: 3571429, interest: 1020833, amount: 4592262, note: 'Kỳ 5' },
+            { term: 6, dateObj: mkDate(2027, 3, 16),  date: '16/03/2027', principal: 3571429, interest: 1020833, amount: 4592262, note: 'Kỳ 6' },
+            { term: 7, dateObj: mkDate(2027, 4, 16),  date: '16/04/2027', principal: 3571426, interest: 1020835, amount: 4592261, note: 'Kỳ 7 - Tất toán hợp đồng' }
+        ];
+        scheduleData.forEach(it => { it.dayOfWeek = THU[it.dateObj.getDay()]; });
+
+        const STORAGE_KEY = 'lotte_finance_state_v2';
+        const LEGACY_KEY  = 'lotte_ios_paid_status';
+        const TODAY       = mkDate(2026, 10, 14);
+
+        /* =========================================================
+           2. STATE + TỰ ĐỘNG LƯU
+           ========================================================= */
+        let state = {
+            payments: Array(7).fill(null),   // 'YYYY-MM-DD' hoặc null
+            rates: Array(7).fill(0)          // % phí chậm trả từng kỳ
+        };
+        let currentIndex = 0;
+        let saveTimeout = null;
+
+        const LS_AVAILABLE = (function () {
+            try {
+                const k = '__ls_test__';
+                localStorage.setItem(k, '1');
+                localStorage.removeItem(k);
+                return true;
+            } catch (e) {
+                console.warn('[Lotte] localStorage không khả dụng:', e);
+                return false;
+            }
+        })();
+
+        function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+        function toISO(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+        function parseISO(iso) { const p = String(iso).split('-'); return mkDate(Number(p[0]), Number(p[1]), Number(p[2])); }
+        function vnDate(iso) { const p = String(iso).split('-'); return pad2(Number(p[2])) + '/' + pad2(Number(p[1])) + '/' + p[0]; }
+        function formatVNĐ(num) { return Math.round(num).toLocaleString('vi-VN') + ' ₫'; }
+        function formatShort(num) { return Math.round(num).toLocaleString('vi-VN') + 'đ'; }
+
+        // ---- LƯU / ĐỌC ----
+        function persist(showToast) {
+            if (!LS_AVAILABLE) return;
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                if (showToast) showSavedIndicator();
+            } catch (e) {
+                console.warn('[Lotte] Lưu thất bại:', e);
+            }
+        }
+
+        function debouncedPersist() {
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => persist(true), 350);
+        }
+
+        function showSavedIndicator() {
+            const el = document.getElementById('save-indicator');
+            if (!el) return;
+            el.classList.remove('opacity-0', '-translate-y-2');
+            el.classList.add('opacity-100', 'translate-y-0');
+            clearTimeout(el._hideTimer);
+            el._hideTimer = setTimeout(() => {
+                el.classList.add('opacity-0', '-translate-y-2');
+                el.classList.remove('opacity-100', 'translate-y-0');
+            }, 1100);
+        }
+
+        function loadState() {
+            if (!LS_AVAILABLE) return;
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const p = JSON.parse(raw);
+                    if (Array.isArray(p.payments) && p.payments.length === 7) state.payments = p.payments;
+                    if (Array.isArray(p.rates) && p.rates.length === 7) state.rates = p.rates.map(Number);
+                    return;
+                }
+                const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || 'null');
+                if (Array.isArray(legacy)) {
+                    state.payments = legacy.map((paid, i) => paid ? toISO(scheduleData[i].dateObj) : null);
+                    persist(false);
+                }
+            } catch (e) { console.warn('[Lotte] Đọc state lỗi:', e); }
+        }
+
+        // Chốt dữ liệu khi ẩn tab / đóng trang
+        window.addEventListener('beforeunload', () => { persist(false); });
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) persist(false);
+        });
+
+        /* =========================================================
+           3. TÍNH PHÍ CHẬM TRẢ
+           ========================================================= */
+        function calcLate(item, paidISO, ratePct) {
+            const due = mkDate(item.dateObj.getFullYear(), item.dateObj.getMonth() + 1, item.dateObj.getDate());
+            const paid = parseISO(paidISO);
+            const days = Math.round((paid - due) / 86400000);
+            if (days <= 0) return { late: false, days: days, fee: 0, total: item.amount };
+            const fee = Math.round(item.amount * (Number(ratePct) || 0) / 100);
+            return { late: true, days: days, fee: fee, total: item.amount + fee };
+        }
+
+        /* =========================================================
+           4. CHUYỂN TAB
+           ========================================================= */
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(b => {
+                b.classList.remove('text-ios-red'); b.classList.add('text-ios-gray');
+            });
+            btn.classList.remove('text-ios-gray');
+            btn.classList.add('text-ios-red');
+        }
+
+        /* =========================================================
+           5. BOTTOM SHEET (nhập ngày đóng - tự động lưu)
+           ========================================================= */
+        function openSheet(index) {
+            currentIndex = index;
+            const item = scheduleData[index];
+            document.getElementById('sheet-term').innerText = 'Kỳ ' + item.term + '/7 · ' + item.dayOfWeek;
+            document.getElementById('sheet-due').innerText = 'Hạn đóng: ' + item.date;
+            document.getElementById('sheet-principal').innerText = formatShort(item.principal);
+            document.getElementById('sheet-interest').innerText = formatShort(item.interest);
+            document.getElementById('sheet-total').innerText = formatShort(item.amount);
+            document.getElementById('sheet-date').value = state.payments[index] || '';
+            document.getElementById('sheet-clear').style.display = state.payments[index] ? 'block' : 'none';
+            updateSheetPreview();
+
+            document.getElementById('payment-sheet').classList.remove('hidden');
+            requestAnimationFrame(() => {
+                document.getElementById('sheet-backdrop').classList.add('opacity-100');
+                document.getElementById('sheet-panel').classList.remove('translate-y-full');
+            });
+        }
+
+        function closeSheet() {
+            document.getElementById('sheet-backdrop').classList.remove('opacity-100');
+            document.getElementById('sheet-panel').classList.add('translate-y-full');
+            setTimeout(() => document.getElementById('payment-sheet').classList.add('hidden'), 300);
+        }
+
+        function setDueDate() {
+            document.getElementById('sheet-date').value = toISO(scheduleData[currentIndex].dateObj);
+            onSheetDateChange();
+        }
+
+        // Tự động lưu khi thay đổi ngày trong sheet
+        function onSheetDateChange() {
+            const val = document.getElementById('sheet-date').value;
+            state.payments[currentIndex] = val ? val : null;
+            document.getElementById('sheet-clear').style.display = val ? 'block' : 'none';
+            debouncedPersist();
+            updateSheetPreview();
+            render(); // cập nhật danh sách bên ngoài luôn
+        }
+
+        function updateSheetPreview() {
+            const val = document.getElementById('sheet-date').value;
+            const item = scheduleData[currentIndex];
+            const rate = Number(state.rates[currentIndex]) || 0;
+            const box = document.getElementById('sheet-preview');
+            const badge = document.getElementById('sheet-badge');
+
+            if (!val) {
+                badge.className = 'text-[10px] font-extrabold px-3 py-1 rounded-full border bg-ios-orange/15 text-ios-orange border-ios-orange/30';
+                badge.innerText = 'Chưa thanh toán';
+                box.innerHTML = '<div class="bg-ios-cardSecondary/50 border border-white/5 rounded-xl px-3.5 py-3">' +
+                    '<p class="text-[11px] text-ios-gray font-semibold">Chưa có ngày đóng — kỳ này được tính là <strong class="text-ios-orange">chưa thanh toán</strong>.</p></div>';
+                return;
+            }
+            const r = calcLate(item, val, rate);
+            if (!r.late) {
+                badge.className = 'text-[10px] font-extrabold px-3 py-1 rounded-full border bg-ios-green/15 text-ios-green border-ios-green/30';
+                badge.innerText = 'Đã thanh toán';
+                const earlyTxt = r.days < 0 ? ('trước hạn ' + Math.abs(r.days) + ' ngày') : 'đúng hạn';
+                box.innerHTML =
+                    '<div class="bg-ios-green/10 border border-ios-green/30 rounded-xl px-3.5 py-3 space-y-1.5">' +
+                        '<p class="text-ios-green text-[11px] font-extrabold">✓ Đóng ' + earlyTxt + ' — không phát sinh phí</p>' +
+                        '<div class="flex justify-between text-[11px]"><span class="text-ios-gray2">Ngày đóng</span><strong class="text-white">' + vnDate(val) + '</strong></div>' +
+                        '<div class="flex justify-between text-[11px]"><span class="text-ios-gray2">Tổng thanh toán</span><strong class="text-ios-green">' + formatVNĐ(item.amount) + '</strong></div>' +
+                    '</div>';
+            } else {
+                badge.className = 'text-[10px] font-extrabold px-3 py-1 rounded-full border bg-ios-red/15 text-ios-red border-ios-red/30';
+                badge.innerText = 'Trễ ' + r.days + ' ngày';
+                box.innerHTML =
+                    '<div class="bg-ios-red/10 border border-ios-red/30 rounded-xl px-3.5 py-3 space-y-1.5">' +
+                        '<p class="text-ios-red text-[11px] font-extrabold">⚠ Đóng trễ ' + r.days + ' ngày</p>' +
+                        '<div class="flex justify-between text-[11px]"><span class="text-ios-gray2">Ngày đóng</span><strong class="text-white">' + vnDate(val) + '</strong></div>' +
+                        '<div class="flex justify-between text-[11px]"><span class="text-ios-gray2">Tiền gốc + lãi</span><strong class="text-white">' + formatVNĐ(item.amount) + '</strong></div>' +
+                        '<div class="flex justify-between text-[11px]"><span class="text-ios-gray2">Phí chậm trả (' + rate + '%)</span><strong class="text-ios-red">+ ' + formatVNĐ(r.fee) + '</strong></div>' +
+                        '<div class="flex justify-between pt-1.5 mt-0.5 border-t border-ios-red/20 text-xs"><span class="text-white font-bold">Tổng phải trả</span><strong class="text-ios-red font-black">' + formatVNĐ(r.total) + '</strong></div>' +
+                    '</div>';
+            }
+        }
+
+        function clearPayment() {
+            state.payments[currentIndex] = null;
+            document.getElementById('sheet-date').value = '';
+            persist(true);
+            updateSheetPreview();
+            render();
+        }
+
+        /* =========================================================
+           6. CÀI ĐẶT MỨC PHÍ (LƯU TỰ ĐỘNG KHI GÕ)
+           ========================================================= */
+        function renderRates() {
+            const box = document.getElementById('rate-container');
+            box.innerHTML = '';
+            scheduleData.forEach((item, i) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between px-4 py-3';
+                row.innerHTML =
+                    '<div class="min-w-0 pr-3">' +
+                        '<p class="text-xs font-bold text-white">Kỳ ' + item.term +
+                            ' <span class="text-ios-gray font-medium">· ' + item.date + '</span></p>' +
+                        '<p class="text-[10px] text-ios-gray mt-0.5">Tổng trả ' + formatShort(item.amount) + '</p>' +
+                    '</div>' +
+                    '<div class="flex items-center gap-1.5 shrink-0">' +
+                        '<input type="number" min="0" step="0.01" inputmode="decimal" value="' + (state.rates[i] || 0) + '" ' +
+                               'oninput="setRate(' + i + ', this.value)" ' +
+                               'onchange="setRate(' + i + ', this.value)" ' +
+                               'class="w-20 bg-ios-cardSecondary border border-white/10 rounded-lg px-2.5 py-2 text-sm font-bold text-white text-right outline-none focus:border-ios-red transition">' +
+                        '<span class="text-xs font-bold text-ios-gray">%</span>' +
+                    '</div>';
+                box.appendChild(row);
+            });
+        }
+
+        function setRate(i, val) {
+            let n = parseFloat(String(val).replace(',', '.'));
+            if (isNaN(n) || n < 0) n = 0;
+            if (state.rates[i] === n) return;
+            state.rates[i] = n;
+            debouncedPersist();
+            render();
+        }
+
+        /* =========================================================
+           7. RENDER TAB LỊCH TRẢ NỢ
+           ========================================================= */
+        function render() {
+            const container = document.getElementById('schedule-container');
+            container.innerHTML = '';
+
+            let paidCount = 0, totalPaid = 0, totalRemaining = 0, nextIndex = -1;
+
+            scheduleData.forEach((item, index) => {
+                const paidISO = state.payments[index];
+                const rate = Number(state.rates[index]) || 0;
+                const isPaid = !!paidISO;
+                const late = isPaid ? calcLate(item, paidISO, rate) : { late: false, days: 0, fee: 0, total: item.amount };
+
+                if (isPaid) { paidCount++; totalPaid += item.amount; }
+                else { totalRemaining += item.amount; if (nextIndex === -1) nextIndex = index; }
+
+                let cardCls = 'p-4 rounded-[22px] border transition-all duration-200 ios-active-scale cursor-pointer ';
+                let badgeCls, badgeTxt, amountCls;
+                if (!isPaid) {
+                    cardCls += 'bg-ios-card border-white/5';
+                    badgeCls = 'bg-ios-orange/15 text-ios-orange border-ios-orange/30';
+                    badgeTxt = 'Chưa thanh toán'; amountCls = 'text-white';
+                } else if (late.late) {
+                    cardCls += 'bg-ios-card border-ios-red/30';
+                    badgeCls = 'bg-ios-red/15 text-ios-red border-ios-red/30';
+                    badgeTxt = 'Trễ ' + late.days + ' ngày'; amountCls = 'text-ios-red';
+                } else {
+                    cardCls += 'bg-ios-card/50 border-ios-green/25';
+                    badgeCls = 'bg-ios-green/15 text-ios-green border-ios-green/30';
+                    badgeTxt = 'Đã thanh toán'; amountCls = 'text-white';
+                }
+
+                const circleCls = isPaid
+                    ? (late.late ? 'bg-ios-red border-ios-red text-white' : 'bg-ios-green border-ios-green text-black')
+                    : 'border-ios-gray text-transparent';
+
+                const payLine = isPaid
+                    ? '<span class="text-ios-green font-bold">' + vnDate(paidISO) + '</span>' +
+                      (late.late ? ' <span class="text-ios-red font-bold">(trễ ' + late.days + ' ngày)</span>' : '')
+                    : '<span class="text-ios-gray">— chưa đóng</span>';
+
+                const bigAmount = isPaid ? late.total : item.amount;
+
+                let html = '';
+                html += '<div class="flex justify-between items-start gap-3">';
+                html +=   '<div class="flex items-start gap-3 min-w-0">';
+                html +=     '<div class="w-6 h-6 mt-0.5 shrink-0 rounded-full border-2 flex items-center justify-center text-[11px] font-black ' + circleCls + '">✓</div>';
+                html +=     '<div class="min-w-0">';
+                html +=       '<p class="text-xs font-bold text-white">Kỳ ' + item.term + ' · ' + item.date + '</p>';
+                html +=       '<p class="text-[11px] mt-0.5">Ngày đóng: ' + payLine + '</p>';
+                html +=     '</div>';
+                html +=   '</div>';
+                html +=   '<div class="text-right shrink-0">';
+                html +=     '<p class="font-extrabold text-sm ' + amountCls + '">' + formatVNĐ(bigAmount) + '</p>';
+                html +=     '<span class="inline-block mt-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ' + badgeCls + '">' + badgeTxt + '</span>';
+                html +=   '</div>';
+                html += '</div>';
+
+                html += '<div class="mt-3 pt-3 border-t border-white/5 grid grid-cols-3 gap-2 text-center">';
+                html +=   '<div><p class="text-[9px] text-ios-gray font-bold uppercase tracking-wide">Tiền gốc</p>';
+                html +=        '<p class="text-[11px] font-extrabold text-white mt-0.5">' + formatShort(item.principal) + '</p></div>';
+                html +=   '<div><p class="text-[9px] text-ios-gray font-bold uppercase tracking-wide">Tiền lãi</p>';
+                html +=        '<p class="text-[11px] font-extrabold text-white mt-0.5">' + formatShort(item.interest) + '</p></div>';
+                html +=   '<div><p class="text-[9px] text-ios-gray font-bold uppercase tracking-wide">Tổng trả</p>';
+                html +=        '<p class="text-[11px] font-extrabold text-ios-yellow mt-0.5">' + formatShort(item.amount) + '</p></div>';
+                html += '</div>';
+
+                if (isPaid && late.late) {
+                    html += '<div class="mt-2.5 bg-ios-red/10 border border-ios-red/25 rounded-xl px-3 py-2 flex justify-between items-center">';
+                    html +=   '<div>';
+                    html +=     '<p class="text-[10px] font-extrabold text-ios-red uppercase tracking-wide">Trễ hạn ' + late.days + ' ngày</p>';
+                    html +=     '<p class="text-[10px] text-ios-gray2 mt-0.5">Phí chậm trả (' + rate + '% × ' + formatShort(item.amount) + '): <strong class="text-white">' + formatShort(late.fee) + '</strong></p>';
+                    html +=   '</div>';
+                    html +=   '<div class="text-right">';
+                    html +=     '<p class="text-[9px] text-ios-gray font-bold uppercase">Tổng cộng</p>';
+                    html +=     '<p class="text-xs font-black text-ios-red">' + formatShort(late.total) + '</p>';
+                    html +=   '</div>';
+                    html += '</div>';
+                }
+
+                const card = document.createElement('div');
+                card.className = cardCls;
+                card.innerHTML = html;
+                card.addEventListener('click', function () { openSheet(index); });
+                container.appendChild(card);
+            });
+
+            // Thẻ Kỳ tiếp theo
+            const badge = document.getElementById('next-status-badge');
+            if (nextIndex !== -1) {
+                const nextItem = scheduleData[nextIndex];
+                const diffDays = Math.ceil((nextItem.dateObj - TODAY) / 86400000);
+                document.getElementById('next-term-title').innerText = 'Kỳ tiếp theo · Kỳ ' + nextItem.term + '/7';
+                if (diffDays > 0) {
+                    document.getElementById('next-countdown-days').innerText = 'Còn ' + diffDays + ' ngày nữa';
+                    badge.className = 'bg-ios-orange/20 border border-ios-orange/40 text-ios-orange text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm';
+                    badge.innerText = diffDays <= 3 ? 'Sắp đến hạn' : 'Chưa đến hạn';
+                } else if (diffDays === 0) {
+                    document.getElementById('next-countdown-days').innerText = 'Đến hạn hôm nay!';
+                    badge.className = 'bg-ios-orange/20 border border-ios-orange/40 text-ios-orange text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm';
+                    badge.innerText = 'Đến hạn';
+                } else {
+                    document.getElementById('next-countdown-days').innerText = 'Quá hạn ' + Math.abs(diffDays) + ' ngày';
+                    badge.className = 'bg-ios-red/20 border border-ios-red/40 text-ios-red text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm';
+                    badge.innerText = 'Quá hạn';
+                }
+                document.getElementById('next-term-date').innerText = nextItem.dayOfWeek + ', ' + nextItem.date;
+                document.getElementById('next-term-amount').innerText = formatVNĐ(nextItem.amount);
+            } else {
+                document.getElementById('next-term-title').innerText = 'Đã hoàn tất khoản vay';
+                document.getElementById('next-countdown-days').innerText = 'Chúc mừng bạn! 🎉';
+                badge.className = 'bg-ios-green/20 border border-ios-green/40 text-ios-green text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm';
+                badge.innerText = 'Đã hoàn thành';
+                document.getElementById('next-term-date').innerText = 'Tất cả 7 kỳ';
+                document.getElementById('next-term-amount').innerText = '0 ₫';
+            }
+
+            // Tiến độ & thống kê
+            const percent = Math.round((paidCount / 7) * 100);
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-text').innerText = paidCount + '/7 Kỳ (' + percent + '%)';
+            document.getElementById('sum-paid').innerText = formatVNĐ(totalPaid);
+            document.getElementById('sum-remaining').innerText = formatVNĐ(totalRemaining);
+        }
+
+        /* =========================================================
+           8. RESET
+           ========================================================= */
+        function resetData() {
+            if (confirm('Bạn có chắc muốn đặt lại toàn bộ ngày đóng của 7 kỳ trả nợ? (Mức phí vẫn giữ nguyên)')) {
+                state.payments = Array(7).fill(null);
+                persist(true);
+                render();
+            }
+        }
+
+        /* =========================================================
+           9. KHỞI CHẠY
+           ========================================================= */
+        loadState();
+        renderRates();
+        render();
+
+        if (!LS_AVAILABLE) {
+            setTimeout(() => alert('Cảnh báo: Trình duyệt đang chặn localStorage, dữ liệu sẽ KHÔNG được lưu khi tải lại trang. Hãy mở file qua http(s):// thay vì file:// hoặc kiểm tra chế độ ẩn danh.'), 500);
+        }
+    </script>
+</body>
+</html>
